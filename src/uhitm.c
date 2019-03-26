@@ -555,12 +555,18 @@ struct attack *uattk; /* ... but we don't enforce that here; Null works ok */
      * occupying both spots) so we don't assume that it's still present
      * on the second attack.
      */
+    int mx = u.dx;
+    int my = u.dy;
     for (count = 3; count > 0; --count) {
         struct monst *mtmp;
         int tx, ty, tmp, dieroll, mhit, attknum, armorpenalty;
 
         /* ++i, wrap 8 to i=0 /or/ --i, wrap -1 to i=7 */
         i = (i + (clockwise ? 1 : 7)) % 8;
+
+        /* hack to ensure cutworm works on adjacent attacks */
+        u.dx = xdir[i];
+        u.dy = ydir[i];
 
         tx = x + xdir[i], ty = y + ydir[i]; /* current target location */
         if (!isok(tx, ty))
@@ -585,6 +591,9 @@ struct attack *uattk; /* ... but we don't enforce that here; Null works ok */
         if (!uwep || u.umortality > umort)
             break;
     }
+    /* restore original primary attack direction */
+    u.dx = mx;
+    u.dy = my;
     /* set up for next time */
     clockwise = !clockwise; /* alternate */
 
